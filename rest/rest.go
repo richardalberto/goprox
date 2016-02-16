@@ -2,6 +2,7 @@ package rest
 
 import (
 	"fmt"
+	"net/http"
 	"net/url"
 
 	log "github.com/Sirupsen/logrus"
@@ -10,22 +11,34 @@ import (
 type RestClient struct {
 	client *Client
 	url    string
+	Header http.Header
+
+	userInfo *url.Userinfo
 }
 
 func NewRestClient(username, password, path string) *RestClient {
-	c := &Client{}
-	c.UserInfo = url.UserPassword(username, password)
-
 	return &RestClient{
-		client: c,
-		url:    path,
+		client:   &Client{},
+		url:      path,
+		userInfo: url.UserPassword(username, password),
+		Header:   http.Header{},
 	}
 }
 
 func (c *RestClient) Get(path string) (*Response, error) {
 	uri := fmt.Sprintf("%s/%s", c.url, path)
 
-	resp, err := c.client.Get(uri)
+	// make a copy of client
+	client := *c.client
+
+	// add authorization header if there's no raw authorization header already.
+	if auth := c.Header.Get("Authorization"); auth != "" {
+		client.Header = &c.Header
+	} else {
+		client.UserInfo = c.userInfo
+	}
+
+	resp, err := client.Get(uri)
 	if err != nil {
 		log.Error(err)
 	}
