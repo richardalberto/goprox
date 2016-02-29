@@ -40,8 +40,9 @@ func (s *Server) start() {
 	// add cors
 	// TODO: make this optional
 	c := cors.New(cors.Options{
-		AllowedHeaders: []string{"Authorization", "Accept"},
+		AllowedHeaders: []string{"Authorization", "Accept", "Content-Type"},
 		Debug:          s.debug,
+		AllowedMethods: []string{"GET", "PUT"},
 	})
 	handler := c.Handler(regexHandler)
 
