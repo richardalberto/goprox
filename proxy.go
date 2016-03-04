@@ -9,6 +9,10 @@ type Proxy struct {
 	Debug bool
 
 	rest *rest.RestClient
+
+	Redis string
+
+	server *Server
 }
 
 func New(url, username, password string) *Proxy {
@@ -19,10 +23,14 @@ func New(url, username, password string) *Proxy {
 		Password: password,
 		rest:     rest,
 		Debug:    true,
+		server:   NewServer(rest, true),
 	}
 }
 
+func (p *Proxy) EnableCache(addr, password string, db int64) error {
+	return p.server.EnableCache(addr, password, db)
+}
+
 func (p *Proxy) Listen(addr string) {
-	server := NewServer(addr, p.rest, p.Debug)
-	server.Start()
+	p.server.Start(addr)
 }
