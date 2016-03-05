@@ -234,9 +234,10 @@ func (c *Client) Get(url string) (*Response, error) {
 // Post sends a POST request.
 func (c *Client) Post(url string, payload interface{}) (*Response, error) {
 	r := Request{
-		Method:  "POST",
-		Url:     url,
-		Payload: payload,
+		Method:     "POST",
+		Url:        url,
+		Payload:    payload,
+		RawPayload: true,
 	}
 	return c.Send(&r)
 }
@@ -244,9 +245,10 @@ func (c *Client) Post(url string, payload interface{}) (*Response, error) {
 // Put sends a PUT request.
 func (c *Client) Put(url string, payload interface{}) (*Response, error) {
 	r := Request{
-		Method:  "PUT",
-		Url:     url,
-		Payload: payload,
+		Method:     "PUT",
+		Url:        url,
+		Payload:    payload,
+		RawPayload: true,
 	}
 	return c.Send(&r)
 }

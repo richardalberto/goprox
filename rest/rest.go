@@ -66,3 +66,25 @@ func (c *RestClient) Put(path string, payload interface{}) (*Response, error) {
 
 	return resp, err
 }
+
+func (c *RestClient) Post(path string, payload interface{}) (*Response, error) {
+	uri := fmt.Sprintf("%s/%s", c.url, path)
+
+	// make a copy of client
+	client := *c.client
+
+	// add authorization header if there's no raw authorization header already.
+	if auth := c.Header.Get("Authorization"); auth != "" {
+		client.Header = &c.Header
+	} else {
+		client.UserInfo = c.userInfo
+	}
+
+	log.Infof("Payload in rest client: %+v", payload)
+	resp, err := client.Post(uri, payload)
+	if err != nil {
+		log.Error(err)
+	}
+
+	return resp, err
+}

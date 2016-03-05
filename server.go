@@ -58,7 +58,7 @@ func (s *Server) start(url string) {
 	c := cors.New(cors.Options{
 		AllowedHeaders: []string{"Authorization", "Accept", "Content-Type"},
 		Debug:          s.debug,
-		AllowedMethods: []string{"GET", "PUT"},
+		AllowedMethods: []string{"GET", "PUT", "POST"},
 	})
 	handler := c.Handler(regexHandler)
 
