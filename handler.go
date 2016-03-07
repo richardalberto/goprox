@@ -21,6 +21,9 @@ func (s *Server) SpadeHandler(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		log.Infof("Received POST Request: %s", r.URL)
 		s.post(w, r)
+	case "DELETE":
+		log.Infof("Received DELETE Request: %s", r.URL)
+		s.delete(w, r)
 	default:
 		log.Errorf("Recived Request with Invalid Method: %s", r.Method)
 	}
@@ -119,6 +122,29 @@ func (s *Server) post(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp, err := client.Post(r.URL.Path, bytes.NewBuffer(b))
+	if err != nil {
+		log.Errorf("An error ocurred %s", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		if buf, err := NewError(err).JSON(); err != nil {
+			w.Write(buf)
+		}
+		return
+	}
+
+	w.WriteHeader(resp.Status())
+	w.Write([]byte(resp.RawText()))
+}
+
+func (s *Server) delete(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	// make a copy of client
+	client := *s.client
+	if auth := r.Header.Get("Authorization"); auth != "" {
+		client.Header.Set("Authorization", auth)
+	}
+
+	resp, err := client.Delete(r.URL.Path)
 	if err != nil {
 		log.Errorf("An error ocurred %s", err)
 		w.WriteHeader(http.StatusInternalServerError)
