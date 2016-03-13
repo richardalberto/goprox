@@ -36,7 +36,7 @@ func (s *Server) get(w http.ResponseWriter, r *http.Request) {
 	if s.redis != nil {
 		if cachedResp, err := s.redis.Get(r.URL.Path).Bytes(); err == nil {
 			var resp cachedResponse
-			if err = json.Unmarshal(cachedResp, &resp); err == nil {
+			if err = json.Unmarshal(cachedResp, &resp); err == nil && resp.Auth == r.Header.Get("Authorization") {
 				log.Infof("Using cached version of %s", r.URL.Path)
 				w.WriteHeader(resp.Status)
 				w.Write([]byte(resp.RawText))
@@ -65,7 +65,7 @@ func (s *Server) get(w http.ResponseWriter, r *http.Request) {
 
 	// cache response
 	if s.redis != nil {
-		if serialized, err := json.Marshal(newCachedResponse(*resp)); err == nil {
+		if serialized, err := json.Marshal(newCachedResponse(*resp, client.Header.Get("Authorization"))); err == nil {
 			if err := s.redis.Set(r.URL.Path, serialized, time.Second*5).Err(); err != nil {
 				log.Errorf("An error ocurred while trying to cache the response for GET: %s in cache, %s", r.URL.Path, err)
 			}
