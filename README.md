@@ -10,6 +10,8 @@ package main
 
 import (
 	"os"
+	"net/http"
+	"log"
 
 	"github.com/damnpoet/goprox"
 )

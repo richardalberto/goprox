@@ -3,10 +3,15 @@ package goprox_test
 import (
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 
 	"github.com/damnpoet/goprox"
+)
+
+var (
+	destURL, _ = url.Parse("http://foo.com")
 )
 
 var testHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -22,7 +27,7 @@ func assertHeaders(t *testing.T, resHeaders http.Header, reqHeaders map[string]s
 }
 
 func TestNoConfig(t *testing.T) {
-	prox := goprox.New("http://foo.com", goprox.Options{
+	prox := goprox.New(destURL, goprox.Options{
 	// Intentionally left blank.
 	})
 
@@ -32,12 +37,12 @@ func TestNoConfig(t *testing.T) {
 	prox.Handler(testHandler).ServeHTTP(res, req)
 
 	assertHeaders(t, res.Header(), map[string]string{
-		"X-Forwarded-For": "example.com",
+		"X-Forwarded-For": "foo.com",
 	})
 }
 
 func TestNonProxyRequest(t *testing.T) {
-	prox := goprox.New("http://foo.com", goprox.Options{
+	prox := goprox.New(destURL, goprox.Options{
 		Path: "/proxy",
 	})
 
@@ -52,7 +57,7 @@ func TestNonProxyRequest(t *testing.T) {
 }
 
 func TestRestrictedToPathRequest(t *testing.T) {
-	prox := goprox.New("http://foo.com", goprox.Options{
+	prox := goprox.New(destURL, goprox.Options{
 		Path: "/proxy",
 	})
 
@@ -62,6 +67,22 @@ func TestRestrictedToPathRequest(t *testing.T) {
 	prox.Handler(testHandler).ServeHTTP(res, req)
 
 	assertHeaders(t, res.Header(), map[string]string{
-		"X-Forwarded-For": "example.com",
+		"X-Forwarded-For": "foo.com",
+	})
+}
+
+func TestCachedRequest(t *testing.T) {
+	prox := goprox.New(destURL, goprox.Options{
+		Cache: true,
+	})
+
+	res := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "http://example.com/foo", nil)
+
+	prox.Handler(testHandler).ServeHTTP(res, req)
+
+	assertHeaders(t, res.Header(), map[string]string{
+		"X-Forwarded-For": "foo.com",
+		"X-Cache":         "SKIP",
 	})
 }

@@ -10,6 +10,6 @@ type Options struct {
 	Debug bool
 	// Cache enables GET requests caching
 	Cache bool
-	// EnableCORS enables cors
-	EnableCORS bool
+	// CORS enables cors
+	CORS bool
 }
