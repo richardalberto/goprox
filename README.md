@@ -10,8 +10,9 @@ package main
 
 import (
 	"os"
-	"net/http"
 	"log"
+	"net/http"
+	"net/url"
 
 	"github.com/damnpoet/goprox"
 )
@@ -19,7 +20,12 @@ import (
 func main() {
 	mux := http.NewServeMux()
 
-	proxy := goprox.New("http://foobar.com", goprox.Options{})
+	u, err := url.Parse(spadeURL)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	proxy := goprox.New(u, goprox.Options{})
 	handler := proxy.Handler(mux)
 
 	log.Fatal(http.ListenAndServe(":8080", handler))
