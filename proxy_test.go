@@ -70,19 +70,3 @@ func TestRestrictedToPathRequest(t *testing.T) {
 		"X-Forwarded-For": "foo.com",
 	})
 }
-
-func TestCachedRequest(t *testing.T) {
-	prox := goprox.New(destURL, goprox.Options{
-		Cache: true,
-	})
-
-	res := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "http://example.com/foo", nil)
-
-	prox.Handler(testHandler).ServeHTTP(res, req)
-
-	assertHeaders(t, res.Header(), map[string]string{
-		"X-Forwarded-For": "foo.com",
-		"X-Cache":         "SKIP",
-	})
-}

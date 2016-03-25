@@ -8,8 +8,4 @@ type Options struct {
 	Path string
 	// Debugging flag adds additional output to debug server side issues
 	Debug bool
-	// Cache enables GET requests caching
-	Cache bool
-	// CORS enables cors
-	CORS bool
 }
